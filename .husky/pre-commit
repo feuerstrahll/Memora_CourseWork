@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+
+# Backend lint check
+cd backend
+echo "📦 Checking backend..."
+npm run lint --silent
+if [ $? -ne 0 ]; then
+  echo "❌ Backend lint failed"
+  exit 1
+fi
+cd ..
+
+# Frontend lint check
+cd frontend
+echo "🎨 Checking frontend..."
+npm run lint --silent
+if [ $? -ne 0 ]; then
+  echo "❌ Frontend lint failed"
+  exit 1
+fi
+cd ..
+
+echo "✅ All checks passed!"
+

@@ -1,0 +1,21 @@
+{
+  "name": "archive-app",
+  "version": "1.0.0",
+  "description": "Archive Management Application",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "docker-compose up",
+    "dev:bg": "docker-compose up -d",
+    "down": "docker-compose down",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "husky": "^8.0.3"
+  }
+}
