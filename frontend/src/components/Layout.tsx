@@ -52,14 +52,9 @@ export default function Layout() {
               Статистика
             </Link>
             {isAdmin && (
-              <>
-                <Link to="/users" className={location.pathname === '/users' ? 'active' : ''}>
-                  Пользователи
-                </Link>
-                <Link to="/audit" className={location.pathname === '/audit' ? 'active' : ''}>
-                  Аудит
-                </Link>
-              </>
+              <Link to="/users" className={location.pathname === '/users' ? 'active' : ''}>
+                Пользователи
+              </Link>
             )}
             <Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>
               Об авторе

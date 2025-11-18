@@ -5,6 +5,8 @@ import {
   IsArray,
   IsEnum,
   IsDateString,
+  ValidateIf,
+  Matches,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AccessLevel } from '../../common/enums/access-level.enum';
@@ -35,11 +37,15 @@ export class CreateRecordDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsDateString()
+  @ValidateIf((o) => o.dateFrom && o.dateTo)
   dateTo?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
+  @Matches(/^(?!.*-\d+).*$/, {
+    message: 'Объём не может содержать отрицательные числа',
+  })
   extent?: string;
 
   @ApiProperty({ enum: AccessLevel, required: false })

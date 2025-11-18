@@ -17,12 +17,14 @@ async function bootstrap() {
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
+      transform: true, // Включаем трансформацию
+      transformOptions: {
+        enableImplicitConversion: true, // Автоматическая конвертация типов
+      },
+      whitelist: true, // Удаляем неопределенные свойства
+      forbidNonWhitelisted: true, // Запрещаем неопределенные свойства
     }),
   );
 

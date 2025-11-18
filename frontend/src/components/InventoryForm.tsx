@@ -79,9 +79,31 @@ export default function InventoryForm({ isOpen, onClose, onSubmit, inventory }: 
           <input
             type="text"
             value={number}
-            onChange={(e) => setNumber(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value
+              // Блокируем ввод минуса
+              if (!value.startsWith('-')) {
+                // Разрешаем только цифры
+                if (value === '' || /^\d+$/.test(value)) {
+                  setNumber(value)
+                }
+              }
+            }}
+            onBlur={(e) => {
+              // При потере фокуса проверяем, что число не отрицательное и не ноль
+              const value = e.target.value.trim()
+              if (value) {
+                const num = parseInt(value)
+                if (isNaN(num) || num < 1) {
+                  setNumber('')
+                }
+              }
+            }}
+            min="1"
             required
             placeholder="1"
+            pattern="[1-9]\d*"
+            title="Введите положительное число (начиная с 1)"
           />
         </div>
 

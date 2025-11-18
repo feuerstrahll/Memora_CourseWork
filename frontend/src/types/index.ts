@@ -91,14 +91,3 @@ export interface Request {
   updatedAt: string
 }
 
-export interface AuditLog {
-  id: number
-  userId?: number
-  user?: User
-  action: string
-  entity: string
-  entityId?: number
-  metadata?: any
-  at: string
-}
-

@@ -1,62 +1,73 @@
-import { IsOptional, IsString, IsNumber, IsEnum, IsArray } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString, IsInt, IsEnum, IsArray, IsDateString, Min, IsIn } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { AccessLevel } from '../../common/enums/access-level.enum';
 
 export class SearchRecordsDto {
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   fondId?: number;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   inventoryId?: number;
 
-  @ApiProperty({ required: false, type: [Number] })
+  @ApiPropertyOptional({ type: [Number] })
   @IsOptional()
   @IsArray()
-  @IsNumber({}, { each: true })
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value.map(Number);
+    if (typeof value === 'string') return value.split(',').map(Number);
+    return [Number(value)];
+  })
   keywordIds?: number[];
 
-  @ApiProperty({ enum: AccessLevel, required: false })
+  @ApiPropertyOptional({ enum: AccessLevel })
   @IsOptional()
   @IsEnum(AccessLevel)
   accessLevel?: AccessLevel;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
+  @IsDateString()
   dateFrom?: string;
 
-  @ApiProperty({ required: false })
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
+  @IsDateString()
   dateTo?: string;
 
-  @ApiProperty({ required: false, default: 1 })
+  @ApiPropertyOptional({ default: 1 })
   @IsOptional()
-  @IsNumber()
-  page?: number;
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
 
-  @ApiProperty({ required: false, default: 20 })
+  @ApiPropertyOptional({ default: 20 })
   @IsOptional()
-  @IsNumber()
-  limit?: number;
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 20;
 
-  @ApiProperty({ required: false, default: 'id' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  sortBy?: string;
+  sortBy?: string = 'id';
 
-  @ApiProperty({ required: false, default: 'ASC' })
+  @ApiPropertyOptional({ enum: ['ASC', 'DESC'] })
   @IsOptional()
-  @IsString()
-  sortOrder?: 'ASC' | 'DESC';
+  @IsIn(['ASC', 'DESC'])
+  sortOrder?: 'ASC' | 'DESC' = 'ASC';
 }
 

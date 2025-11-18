@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { Role } from '../../common/enums/role.enum';
 import { Request } from '../../requests/entities/request.entity';
-import { AuditLog } from '../../audit/entities/audit-log.entity';
 
 @Entity('users')
 export class User {
@@ -39,8 +38,5 @@ export class User {
 
   @OneToMany(() => Request, (request) => request.user)
   requests: Request[];
-
-  @OneToMany(() => AuditLog, (log) => log.user)
-  auditLogs: AuditLog[];
 }
 

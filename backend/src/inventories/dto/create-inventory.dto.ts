@@ -1,4 +1,4 @@
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateInventoryDto {
@@ -8,6 +8,9 @@ export class CreateInventoryDto {
 
   @ApiProperty()
   @IsString()
+  @Matches(/^[1-9]\d*$/, {
+    message: 'Номер описи должен быть положительным числом (начиная с 1)',
+  })
   number: string;
 
   @ApiProperty()

@@ -11,7 +11,6 @@ import { RecordsModule } from './records/records.module';
 import { KeywordsModule } from './keywords/keywords.module';
 import { DigitalCopiesModule } from './digital-copies/digital-copies.module';
 import { RequestsModule } from './requests/requests.module';
-import { AuditModule } from './audit/audit.module';
 import { StatsModule } from './stats/stats.module';
 import { typeOrmConfig } from './config/typeorm.config';
 
@@ -32,7 +31,6 @@ import { typeOrmConfig } from './config/typeorm.config';
     KeywordsModule,
     DigitalCopiesModule,
     RequestsModule,
-    AuditModule,
     StatsModule,
   ],
   controllers: [AppController],

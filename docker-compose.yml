@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: archive_pass
       POSTGRES_DB: archive_db
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Внешний порт 5433, внутренний 5432 (избегаем конфликта с локальным PostgreSQL)
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

@@ -3,7 +3,14 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  
+  background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), 
+                    url('books_library_shelves_138556_2560x1440.jpg');
+  
+  background-size: cover; /* Растягивает изображение на весь экран */
+  background-position: center; /* Центрирует изображение */
+  background-repeat: no-repeat; /* Не повторяет изображение */
+  background-attachment: fixed; /* Фиксирует фон при прокрутке */
 }
 
 .auth-card {
@@ -42,7 +49,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #ff861c;
 }
 
 .submit-btn {

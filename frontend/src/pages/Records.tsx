@@ -27,13 +27,28 @@ export default function Records() {
     queryFn: fondsApi.getAll,
   })
 
-  const { data: searchResult } = useQuery({
+  const { data: searchResult, error: searchError, isLoading: isSearchLoading } = useQuery({
     queryKey: ['records', 'search', search, fondId, page],
-    queryFn: () => recordsApi.search({ search, fondId, page, limit }),
+    queryFn: () => {
+      const params = { search, fondId, page, limit }
+      console.log('Frontend: Sending search request with params:', params)
+      return recordsApi.search(params)
+    },
     enabled: !!search || !!fondId,
+    retry: false,
+    onError: (error: any) => {
+      console.error('Frontend: Search error:', error)
+      // Не показываем ошибку для ошибок валидации (400) - это нормально
+      if (error.response?.status !== 400 && error.response?.status !== 401) {
+        showToast('Ошибка при поиске записей', 'error')
+      }
+    },
+    onSuccess: (data) => {
+      console.log('Frontend: Search result:', data)
+    },
   })
 
-  const { data: records } = useQuery({
+  const { data: records, isLoading: isRecordsLoading } = useQuery({
     queryKey: ['records'],
     queryFn: () => recordsApi.getAll(),
     enabled: !search && !fondId,
@@ -42,7 +57,14 @@ export default function Records() {
   const createMutation = useMutation({
     mutationFn: recordsApi.create,
     onSuccess: () => {
+      // Инвалидируем все запросы связанные с records (и общий список, и поиск)
       queryClient.invalidateQueries({ queryKey: ['records'] })
+      // Также инвалидируем поисковые запросы явно
+      queryClient.invalidateQueries({ queryKey: ['records', 'search'] })
+      // Если активен фильтр, сбрасываем страницу на 1, чтобы увидеть новую запись
+      if (fondId || search) {
+        setPage(1)
+      }
       showToast('Единица хранения успешно создана', 'success')
     },
     onError: () => {
@@ -54,7 +76,10 @@ export default function Records() {
     mutationFn: ({ id, data }: { id: number; data: Partial<Record> }) =>
       recordsApi.update(id, data),
     onSuccess: () => {
+      // Инвалидируем все запросы связанные с records (и общий список, и поиск)
       queryClient.invalidateQueries({ queryKey: ['records'] })
+      // Также инвалидируем поисковые запросы явно
+      queryClient.invalidateQueries({ queryKey: ['records', 'search'] })
       showToast('Единица хранения успешно обновлена', 'success')
     },
     onError: () => {
@@ -65,7 +90,10 @@ export default function Records() {
   const deleteMutation = useMutation({
     mutationFn: recordsApi.delete,
     onSuccess: () => {
+      // Инвалидируем все запросы связанные с records (и общий список, и поиск)
       queryClient.invalidateQueries({ queryKey: ['records'] })
+      // Также инвалидируем поисковые запросы явно
+      queryClient.invalidateQueries({ queryKey: ['records', 'search'] })
       showToast('Единица хранения успешно удалена', 'success')
     },
     onError: () => {
@@ -111,7 +139,13 @@ export default function Records() {
   }
 
   const canEdit = user?.role === Role.ADMIN || user?.role === Role.ARCHIVIST
-  const data = search || fondId ? searchResult?.data : records || []
+  // Обрабатываем данные: если есть ошибка поиска (кроме 400), показываем пустой массив
+  // Иначе берем данные из searchResult или records
+  const data = search || fondId 
+    ? (searchError && searchError.response?.status !== 400 ? [] : (searchResult?.data ?? []))
+    : (records ?? [])
+  
+  const isLoading = search || fondId ? isSearchLoading : isRecordsLoading
 
   return (
     <div className="table-page">
@@ -155,12 +189,24 @@ export default function Records() {
           type="text"
           placeholder="Поиск по названию, аннотации или шифру..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value)
+            setPage(1) // Сбрасываем страницу при изменении поиска
+          }}
           className="search-input"
         />
         <select
           value={fondId || ''}
-          onChange={(e) => setFondId(e.target.value ? +e.target.value : undefined)}
+          onChange={(e) => {
+            const value = e.target.value
+            const newFondId = value && value !== '' ? +value : undefined
+            setFondId(newFondId)
+            setPage(1) // Сбрасываем страницу при изменении фильтра
+            // Очищаем поиск при выборе фонда, чтобы избежать конфликтов
+            if (newFondId && search) {
+              setSearch('')
+            }
+          }}
           className="filter-select"
         >
           <option value="">Все фонды</option>
@@ -186,7 +232,28 @@ export default function Records() {
             </tr>
           </thead>
           <tbody>
-            {data.map((record: Record) => (
+            {isLoading && (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                  Загрузка...
+                </td>
+              </tr>
+            )}
+            {!isLoading && data.length === 0 && (search || fondId) && (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                  Записи не найдены
+                </td>
+              </tr>
+            )}
+            {!isLoading && data.length === 0 && !search && !fondId && (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                  Нет данных
+                </td>
+              </tr>
+            )}
+            {!isLoading && data.map((record: Record) => (
               <tr key={record.id}>
                 <td>{record.refCode}</td>
                 <td>{record.title}</td>

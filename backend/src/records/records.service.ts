@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, Between } from 'typeorm';
 import { Record as RecordEntity } from './entities/record.entity';
@@ -14,6 +14,15 @@ export class RecordsService {
   ) {}
 
   async create(createRecordDto: CreateRecordDto): Promise<RecordEntity> {
+    // Валидация дат: dateTo должна быть >= dateFrom
+    if (createRecordDto.dateFrom && createRecordDto.dateTo) {
+      const dateFrom = new Date(createRecordDto.dateFrom);
+      const dateTo = new Date(createRecordDto.dateTo);
+      if (dateTo < dateFrom) {
+        throw new BadRequestException('Дата "до" не может быть раньше даты "от"');
+      }
+    }
+
     const record = this.recordsRepository.create({
       inventoryId: createRecordDto.inventoryId,
       refCode: createRecordDto.refCode,
@@ -50,6 +59,9 @@ export class RecordsService {
       sortOrder = 'ASC',
     } = searchDto;
 
+    // Логирование для отладки
+    console.log('Search params:', { search, fondId, inventoryId, page, limit });
+
     const query = this.recordsRepository
       .createQueryBuilder('record')
       .leftJoinAndSelect('record.inventory', 'inventory')
@@ -65,7 +77,9 @@ export class RecordsService {
     }
 
     if (fondId) {
-      query.andWhere('fond.id = :fondId', { fondId });
+      // Фильтруем по ID фонда через связь record -> inventory -> fond
+      // Используем прямой доступ к полю fondId в таблице inventories
+      query.andWhere('inventory.fondId = :fondId', { fondId });
     }
 
     if (inventoryId) {
@@ -142,10 +156,18 @@ export class RecordsService {
   async update(id: number, updateRecordDto: UpdateRecordDto): Promise<RecordEntity> {
     const record = await this.findOne(id);
     
+    // Валидация дат: dateTo должна быть >= dateFrom
+    const dateFrom = updateRecordDto.dateFrom ? new Date(updateRecordDto.dateFrom) : record.dateFrom;
+    const dateTo = updateRecordDto.dateTo ? new Date(updateRecordDto.dateTo) : record.dateTo;
+    
+    if (dateFrom && dateTo && dateTo < dateFrom) {
+      throw new BadRequestException('Дата "до" не может быть раньше даты "от"');
+    }
+    
     Object.assign(record, {
       ...updateRecordDto,
-      dateFrom: updateRecordDto.dateFrom ? new Date(updateRecordDto.dateFrom) : record.dateFrom,
-      dateTo: updateRecordDto.dateTo ? new Date(updateRecordDto.dateTo) : record.dateTo,
+      dateFrom,
+      dateTo,
     });
 
     if (updateRecordDto.keywordIds !== undefined) {

@@ -86,7 +86,7 @@ export default function UserRoleForm({ isOpen, onClose, onSubmit, user }: UserRo
           <ul style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
             <li><strong>Исследователь:</strong> просмотр и поиск документов, создание заявок</li>
             <li><strong>Архивариус:</strong> управление фондами, описями, документами и заявками</li>
-            <li><strong>Администратор:</strong> полный доступ, включая управление пользователями и аудит</li>
+            <li><strong>Администратор:</strong> полный доступ, включая управление пользователями</li>
           </ul>
         </div>
 

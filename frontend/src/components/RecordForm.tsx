@@ -132,12 +132,28 @@ export default function RecordForm({ isOpen, onClose, onSubmit, record }: Record
 
         <div className="form-group">
           <label>Дата от</label>
-          <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+          <input 
+            type="date" 
+            value={dateFrom} 
+            onChange={(e) => {
+              setDateFrom(e.target.value)
+              // Если дата "до" раньше новой даты "от", сбрасываем дату "до"
+              if (dateTo && e.target.value && dateTo < e.target.value) {
+                setDateTo('')
+              }
+            }}
+            max={dateTo || undefined}
+          />
         </div>
 
         <div className="form-group">
           <label>Дата до</label>
-          <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+          <input 
+            type="date" 
+            value={dateTo} 
+            onChange={(e) => setDateTo(e.target.value)}
+            min={dateFrom || undefined}
+          />
         </div>
 
         <div className="form-group">
@@ -145,7 +161,28 @@ export default function RecordForm({ isOpen, onClose, onSubmit, record }: Record
           <input
             type="text"
             value={extent}
-            onChange={(e) => setExtent(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value
+              // Блокируем ввод минуса в начале строки
+              if (!value.startsWith('-')) {
+                setExtent(value)
+              }
+            }}
+            onBlur={(e) => {
+              // При потере фокуса проверяем, что если есть число в начале, оно не отрицательное
+              const value = e.target.value.trim()
+              if (value) {
+                // Ищем число в начале строки (может быть отрицательное)
+                const numMatch = value.match(/^-?\d+/)
+                if (numMatch) {
+                  const num = parseInt(numMatch[0])
+                  if (num < 0) {
+                    // Удаляем минус из начала числа
+                    setExtent(value.replace(/^-/, ''))
+                  }
+                }
+              }
+            }}
             placeholder="50 листов"
           />
         </div>

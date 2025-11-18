@@ -10,7 +10,6 @@ import Records from './pages/Records'
 import Requests from './pages/Requests'
 import Users from './pages/Users'
 import Stats from './pages/Stats'
-import Audit from './pages/Audit'
 import About from './pages/About'
 import NotFound from './pages/NotFound'
 import Forbidden from './pages/Forbidden'
@@ -43,7 +42,6 @@ function App() {
           <Route path="requests" element={<Requests />} />
           <Route path="users" element={<Users />} />
           <Route path="stats" element={<Stats />} />
-          <Route path="audit" element={<Audit />} />
           <Route path="about" element={<About />} />
         </Route>
         <Route path="/forbidden" element={<Forbidden />} />
