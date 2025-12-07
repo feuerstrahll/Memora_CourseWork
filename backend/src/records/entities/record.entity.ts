@@ -55,6 +55,15 @@ export class Record {
   })
   accessLevel: AccessLevel;
 
+  @Column({ nullable: true })
+  filePath: string;
+
+  @Column({ nullable: true })
+  fileName: string;
+
+  @Column({ nullable: true })
+  fileSize: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

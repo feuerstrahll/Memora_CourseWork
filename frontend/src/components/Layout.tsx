@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Outlet, Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Role } from '../types'
@@ -9,6 +10,16 @@ export default function Layout() {
 
   const isAdmin = user?.role === Role.ADMIN
   const isArchivist = user?.role === Role.ARCHIVIST || isAdmin
+
+  // Аварийный сброс overflow при монтировании и смене маршрута
+  useEffect(() => {
+    // Проверяем, нет ли открытых модальных окон
+    const hasOpenModal = document.querySelector('.modal-overlay')
+    if (!hasOpenModal) {
+      // Если нет открытых модальных окон, сбрасываем overflow
+      document.body.style.overflow = 'unset'
+    }
+  }, [location.pathname])
 
   return (
     <div className="layout">

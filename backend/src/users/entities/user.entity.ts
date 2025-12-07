@@ -30,6 +30,16 @@ export class User {
   })
   role: Role;
 
+  // Личная информация исследователя
+  @Column({ nullable: true })
+  occupation: string; // Род деятельности
+
+  @Column({ nullable: true })
+  workplace: string; // Место работы
+
+  @Column({ nullable: true })
+  position: string; // Должность
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -17,6 +17,8 @@ export enum RequestType {
 export enum RequestStatus {
   NEW = 'new',
   IN_PROGRESS = 'in_progress',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
   COMPLETED = 'completed',
 }
 
@@ -25,6 +27,16 @@ export interface User {
   email: string
   fullName: string
   role: Role
+  occupation?: string   // Род деятельности
+  workplace?: string    // Место работы
+  position?: string     // Должность
+}
+
+export interface UpdateProfileData {
+  fullName?: string
+  occupation?: string
+  workplace?: string
+  position?: string
 }
 
 export interface Fond {
@@ -73,6 +85,9 @@ export interface Record {
   dateTo?: string
   extent?: string
   accessLevel: AccessLevel
+  filePath?: string
+  fileName?: string
+  fileSize?: number
   keywords?: Keyword[]
   digitalCopies?: DigitalCopy[]
   createdAt: string
@@ -87,6 +102,10 @@ export interface Request {
   user?: User
   type: RequestType
   status: RequestStatus
+  rejectionReason?: string
+  processedById?: number
+  processedBy?: User
+  processedAt?: string
   createdAt: string
   updatedAt: string
 }

@@ -14,7 +14,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Global exception filter
+  // Глобальный фильтр ошибок
   app.useGlobalFilters(new HttpExceptionFilter());
 
   app.useGlobalPipes(

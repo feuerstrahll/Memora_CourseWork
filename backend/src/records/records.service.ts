@@ -5,12 +5,19 @@ import { Record as RecordEntity } from './entities/record.entity';
 import { CreateRecordDto } from './dto/create-record.dto';
 import { UpdateRecordDto } from './dto/update-record.dto';
 import { SearchRecordsDto } from './dto/search-records.dto';
+import { Request } from '../requests/entities/request.entity';
+import { RequestStatus } from '../common/enums/request-status.enum';
+import { unlink } from 'fs/promises';
+import { existsSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class RecordsService {
   constructor(
     @InjectRepository(RecordEntity)
     private recordsRepository: Repository<RecordEntity>,
+    @InjectRepository(Request)
+    private requestsRepository: Repository<Request>,
   ) {}
 
   async create(createRecordDto: CreateRecordDto): Promise<RecordEntity> {
@@ -180,7 +187,73 @@ export class RecordsService {
 
   async remove(id: number): Promise<void> {
     const record = await this.findOne(id);
+    
+    // Удаляем файл, если он есть
+    if (record.filePath) {
+      await this.deleteFileFromDisk(record.filePath);
+    }
+    
     await this.recordsRepository.remove(record);
+  }
+
+  async uploadFile(id: number, file: Express.Multer.File): Promise<RecordEntity> {
+    const record = await this.findOne(id);
+
+    // Удаляем старый файл, если он есть
+    if (record.filePath) {
+      await this.deleteFileFromDisk(record.filePath);
+    }
+
+    // Сохраняем информацию о новом файле
+    record.filePath = file.path;
+    record.fileName = file.originalname;
+    record.fileSize = file.size;
+
+    await this.recordsRepository.save(record);
+    return this.findOne(id);
+  }
+
+  async removeFile(id: number): Promise<RecordEntity> {
+    const record = await this.findOne(id);
+
+    if (!record.filePath) {
+      throw new NotFoundException('У данной единицы хранения нет прикрепленного файла');
+    }
+
+    // Удаляем файл с диска
+    await this.deleteFileFromDisk(record.filePath);
+
+    // Очищаем информацию о файле в БД
+    record.filePath = null;
+    record.fileName = null;
+    record.fileSize = null;
+
+    await this.recordsRepository.save(record);
+    return this.findOne(id);
+  }
+
+  private async deleteFileFromDisk(filePath: string): Promise<void> {
+    try {
+      const fullPath = join(process.cwd(), filePath);
+      if (existsSync(fullPath)) {
+        await unlink(fullPath);
+      }
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      // Не пробрасываем ошибку дальше, чтобы не блокировать удаление записи
+    }
+  }
+
+  async checkUserHasApprovedRequest(recordId: number, userId: number): Promise<boolean> {
+    const approvedRequest = await this.requestsRepository.findOne({
+      where: {
+        recordId,
+        userId,
+        status: RequestStatus.APPROVED,
+      },
+    });
+    
+    return !!approvedRequest;
   }
 }
 

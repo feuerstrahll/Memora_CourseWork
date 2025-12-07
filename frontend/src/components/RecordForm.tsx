@@ -7,7 +7,7 @@ import { inventoriesApi, keywordsApi } from '../api'
 interface RecordFormProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: Partial<Record>) => Promise<void>
+  onSubmit: (data: Partial<Record>, file?: File | null) => Promise<void>
   record?: Record | null
 }
 
@@ -21,6 +21,7 @@ export default function RecordForm({ isOpen, onClose, onSubmit, record }: Record
   const [extent, setExtent] = useState('')
   const [accessLevel, setAccessLevel] = useState<AccessLevel>(AccessLevel.PUBLIC)
   const [selectedKeywords, setSelectedKeywords] = useState<number[]>([])
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
 
   const { data: inventories } = useQuery({
@@ -54,6 +55,7 @@ export default function RecordForm({ isOpen, onClose, onSubmit, record }: Record
       setExtent('')
       setAccessLevel(AccessLevel.PUBLIC)
       setSelectedKeywords([])
+      setSelectedFile(null)
     }
   }, [record])
 
@@ -71,7 +73,7 @@ export default function RecordForm({ isOpen, onClose, onSubmit, record }: Record
         extent: extent || undefined,
         accessLevel,
         keywordIds: selectedKeywords,
-      })
+      }, selectedFile)
       onClose()
     } catch (error) {
       console.error('Error submitting form:', error)
@@ -219,6 +221,36 @@ export default function RecordForm({ isOpen, onClose, onSubmit, record }: Record
           <small style={{ display: 'block', marginTop: '0.25rem', color: '#666' }}>
             Удерживайте Ctrl для выбора нескольких
           </small>
+        </div>
+
+        <div className="form-group">
+          <label>Прикрепить файл (PDF или DOCX)</label>
+          <input
+            type="file"
+            accept=".pdf,.docx"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) {
+                const maxSize = 10 * 1024 * 1024 // 10MB
+                if (file.size > maxSize) {
+                  alert('Размер файла не должен превышать 10 МБ')
+                  e.target.value = ''
+                  return
+                }
+                setSelectedFile(file)
+              }
+            }}
+          />
+          {record?.fileName && (
+            <small style={{ display: 'block', marginTop: '0.25rem', color: '#666' }}>
+              Текущий файл: {record.fileName}
+            </small>
+          )}
+          {selectedFile && (
+            <small style={{ display: 'block', marginTop: '0.25rem', color: '#007bff' }}>
+              Новый файл: {selectedFile.name}
+            </small>
+          )}
         </div>
 
         <div className="form-actions">

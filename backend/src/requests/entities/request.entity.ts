@@ -44,6 +44,19 @@ export class Request {
   })
   status: RequestStatus;
 
+  @Column({ nullable: true })
+  rejectionReason: string;
+
+  @Column({ nullable: true })
+  processedById: number;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'processedById' })
+  processedBy: User;
+
+  @Column({ nullable: true })
+  processedAt: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 

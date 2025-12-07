@@ -47,8 +47,12 @@ export class RequestsController {
   @Patch(':id')
   @Roles(Role.ADMIN, Role.ARCHIVIST)
   @ApiOperation({ summary: 'Update request status (Admin/Archivist only)' })
-  update(@Param('id') id: string, @Body() updateRequestDto: UpdateRequestDto) {
-    return this.requestsService.update(+id, updateRequestDto);
+  update(
+    @Param('id') id: string, 
+    @Body() updateRequestDto: UpdateRequestDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.requestsService.update(+id, updateRequestDto, user.id);
   }
 
   @Delete(':id')

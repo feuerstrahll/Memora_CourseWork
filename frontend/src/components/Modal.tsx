@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import './Modal.css'
 
 interface ModalProps {
@@ -8,7 +8,12 @@ interface ModalProps {
   children: React.ReactNode
 }
 
+// Счетчик открытых модальных окон
+let openModalsCount = 0
+
 export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  const prevOpenRef = useRef(false)
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -16,14 +21,31 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       }
     }
 
-    if (isOpen) {
+    // Управляем счетчиком только при реальном изменении состояния
+    if (isOpen && !prevOpenRef.current) {
+      openModalsCount++
       document.addEventListener('keydown', handleEscape)
       document.body.style.overflow = 'hidden'
+    } else if (!isOpen && prevOpenRef.current) {
+      openModalsCount--
+      document.removeEventListener('keydown', handleEscape)
+      // Сбрасываем overflow только если нет других открытых модальных окон
+      if (openModalsCount === 0) {
+        document.body.style.overflow = 'unset'
+      }
     }
 
+    prevOpenRef.current = isOpen
+
     return () => {
-      document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'unset'
+      // Cleanup при размонтировании
+      if (prevOpenRef.current) {
+        openModalsCount--
+        document.removeEventListener('keydown', handleEscape)
+        if (openModalsCount === 0) {
+          document.body.style.overflow = 'unset'
+        }
+      }
     }
   }, [isOpen, onClose])
 

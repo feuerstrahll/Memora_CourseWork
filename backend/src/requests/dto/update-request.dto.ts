@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { RequestStatus } from '../../common/enums/request-status.enum';
 
@@ -7,5 +7,10 @@ export class UpdateRequestDto {
   @IsOptional()
   @IsEnum(RequestStatus)
   status?: RequestStatus;
+
+  @ApiProperty({ required: false, description: 'Причина отклонения заявки' })
+  @IsOptional()
+  @IsString()
+  rejectionReason?: string;
 }
 

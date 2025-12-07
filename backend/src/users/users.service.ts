@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -38,6 +39,24 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
     Object.assign(user, updateUserDto);
+    return this.usersRepository.save(user);
+  }
+
+  async updateProfile(id: number, updateProfileDto: UpdateProfileDto): Promise<User> {
+    const user = await this.findOne(id);
+    // Обновляем поля профиля
+    if (updateProfileDto.fullName !== undefined) {
+      user.fullName = updateProfileDto.fullName;
+    }
+    if (updateProfileDto.occupation !== undefined) {
+      user.occupation = updateProfileDto.occupation;
+    }
+    if (updateProfileDto.workplace !== undefined) {
+      user.workplace = updateProfileDto.workplace;
+    }
+    if (updateProfileDto.position !== undefined) {
+      user.position = updateProfileDto.position;
+    }
     return this.usersRepository.save(user);
   }
 

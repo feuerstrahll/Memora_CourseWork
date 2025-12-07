@@ -16,5 +16,29 @@ export const recordsApi = {
   update: (id: number, data: Partial<Record>) =>
     api.patch<Record>(`/records/${id}`, data).then((res) => res.data),
   delete: (id: number) => api.delete(`/records/${id}`).then((res) => res.data),
+  uploadFile: (id: number, file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post<Record>(`/records/${id}/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }).then((res) => res.data)
+  },
+  downloadFile: (id: number, fileName: string) => {
+    return api.get(`/records/${id}/download`, {
+      responseType: 'blob',
+    }).then((res) => {
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', fileName)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    })
+  },
+  deleteFile: (id: number) => api.delete(`/records/${id}/file`).then((res) => res.data),
 }
 

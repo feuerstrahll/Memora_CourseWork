@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -19,12 +21,33 @@ import { Role } from '../common/enums/role.enum';
 
 @ApiTags('users')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  // Endpoint для получения своего профиля (доступен всем авторизованным)
+  @Get('profile')
+  @ApiOperation({ summary: 'Get current user profile' })
+  async getProfile(@Request() req) {
+    const user = await this.usersService.findOne(req.user.id);
+    // Не возвращаем пароль
+    const { passwordHash, ...result } = user;
+    return result;
+  }
+
+  // Endpoint для обновления своего профиля (доступен всем авторизованным)
+  @Patch('profile')
+  @ApiOperation({ summary: 'Update current user profile' })
+  async updateProfile(@Request() req, @Body() updateProfileDto: UpdateProfileDto) {
+    const user = await this.usersService.updateProfile(req.user.id, updateProfileDto);
+    // Не возвращаем пароль
+    const { passwordHash, ...result } = user;
+    return result;
+  }
+
   @Post()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Create user (Admin only)' })
   create(@Body() createUserDto: CreateUserDto) {
@@ -32,6 +55,7 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get all users (Admin only)' })
   findAll() {
@@ -39,6 +63,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Get user by ID (Admin only)' })
   findOne(@Param('id') id: string) {
@@ -46,6 +71,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Update user (Admin only)' })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -53,6 +79,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Delete user (Admin only)' })
   remove(@Param('id') id: string) {

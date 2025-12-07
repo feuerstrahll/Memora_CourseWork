@@ -127,3 +127,128 @@
   color: white;
 }
 
+/* Sortable table styles */
+.sortable-table .sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.sortable-table .sortable-header:hover {
+  background-color: #e9ecef;
+}
+
+.sortable-table .header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.sortable-table .sort-icon {
+  font-size: 0.8rem;
+  color: #6c757d;
+  min-width: 1rem;
+  text-align: center;
+}
+
+.sortable-table .sortable-header:hover .sort-icon {
+  color: #667eea;
+}
+
+/* Filter row styles */
+.filter-row {
+  background-color: #f1f3f5 !important;
+}
+
+.filter-row th {
+  padding: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.column-filter-input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.column-filter-input:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.column-filter-input::placeholder {
+  color: #adb5bd;
+  font-size: 0.8rem;
+}
+
+.column-filter-select {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.column-filter-select:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+/* Filter toggle button */
+.btn-filter-toggle {
+  padding: 0.75rem 1rem;
+  border: 1px solid #667eea;
+  border-radius: 4px;
+  background-color: white;
+  color: #667eea;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-filter-toggle:hover {
+  background-color: #667eea;
+  color: white;
+}
+
+.btn-filter-toggle.active {
+  background-color: #667eea;
+  color: white;
+}
+
+/* Reset filters button */
+.btn-reset-filters {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e74c3c;
+  border-radius: 4px;
+  background-color: white;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-reset-filters:hover {
+  background-color: #e74c3c;
+  color: white;
+}
+
+/* Active sort indicator */
+.sortable-table th[data-sorted="true"] .sort-icon {
+  color: #667eea;
+  font-weight: bold;
+}
+

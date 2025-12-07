@@ -45,6 +45,10 @@ yarn-error.log*
 # Docker volumes
 postgres-data/
 
+# Uploaded files (ignore content but keep directories)
+backend/uploads/**/*
+!backend/uploads/**/.gitkeep
+
 # Personal files
 *.docx
 *.pdf

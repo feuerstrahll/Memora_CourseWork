@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request } from './entities/request.entity';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
 import { Role } from '../common/enums/role.enum';
+import { RequestStatus } from '../common/enums/request-status.enum';
 
 @Injectable()
 export class RequestsService {
@@ -25,10 +26,11 @@ export class RequestsService {
     const query = this.requestsRepository.createQueryBuilder('request')
       .leftJoinAndSelect('request.record', 'record')
       .leftJoinAndSelect('request.user', 'user')
+      .leftJoinAndSelect('request.processedBy', 'processedBy')
       .leftJoinAndSelect('record.inventory', 'inventory')
       .leftJoinAndSelect('inventory.fond', 'fond');
 
-    // Researchers can only see their own requests
+    // Исследователи могут видеть только свои заявки
     if (userRole === Role.RESEARCHER && userId) {
       query.where('request.userId = :userId', { userId });
     }
@@ -46,7 +48,7 @@ export class RequestsService {
       throw new NotFoundException(`Request with ID ${id} not found`);
     }
 
-    // Researchers can only see their own requests
+    // Исследователи могут видеть только свои заявки
     if (userRole === Role.RESEARCHER && request.userId !== userId) {
       throw new ForbiddenException('Access denied');
     }
@@ -57,8 +59,22 @@ export class RequestsService {
   async update(
     id: number,
     updateRequestDto: UpdateRequestDto,
+    processedById?: number,
   ): Promise<Request> {
     const request = await this.findOne(id);
+    
+    // При отклонении требуется указать причину
+    if (updateRequestDto.status === RequestStatus.REJECTED && !updateRequestDto.rejectionReason) {
+      throw new BadRequestException('Необходимо указать причину отклонения');
+    }
+    
+    // Записываем информацию о том, кто обработал заявку
+    if (updateRequestDto.status === RequestStatus.APPROVED || 
+        updateRequestDto.status === RequestStatus.REJECTED) {
+      request.processedById = processedById;
+      request.processedAt = new Date();
+    }
+    
     Object.assign(request, updateRequestDto);
     return this.requestsRepository.save(request);
   }

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Login from './pages/Login'
@@ -22,6 +22,23 @@ function PrivateRoute({ children }: { children: React.ReactElement }) {
 }
 
 function App() {
+  // Глобальный механизм аварийного сброса затемнения
+  useEffect(() => {
+    const handleEmergencyReset = (e: KeyboardEvent) => {
+      // Ctrl+Shift+Escape для аварийного сброса
+      if (e.ctrlKey && e.shiftKey && e.key === 'Escape') {
+        console.log('Emergency reset: clearing body overflow')
+        document.body.style.overflow = 'unset'
+        // Закрываем все модальные окна
+        const modals = document.querySelectorAll('.modal-overlay')
+        modals.forEach(modal => modal.remove())
+      }
+    }
+
+    window.addEventListener('keydown', handleEmergencyReset)
+    return () => window.removeEventListener('keydown', handleEmergencyReset)
+  }, [])
+
   return (
     <AuthProvider>
       <Routes>
