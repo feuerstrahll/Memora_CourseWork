@@ -43,6 +43,7 @@ docker-compose logs -f backend
 - 🌐 **Frontend**: http://localhost:5173
 - 🔌 **Backend API**: http://localhost:3000
 - 📖 **Swagger**: http://localhost:3000/api/docs
+- 🗄️ **pgAdmin** (управление БД): http://localhost:5050
 
 ---
 
@@ -179,8 +180,68 @@ docker-compose restart backend frontend
 # Пересборка
 docker-compose up --build
 
+# Подключение к БД через командную строку
+docker exec -it archive_postgres psql -U archive_user -d archive_db
+
+# Просмотр таблиц
+docker exec -it archive_postgres psql -U archive_user -d archive_db -c "\dt"
+
+# Выполнение SQL запроса
+docker exec -it archive_postgres psql -U archive_user -d archive_db -c "SELECT * FROM users;"
+```
+
+---
+
+## 🗄️ Управление базой данных
+
+### Способ 1: pgAdmin (веб-интерфейс) - РЕКОМЕНДУЕТСЯ
+
+После запуска `docker-compose up -d` откройте http://localhost:5050
+
+**Вход:**
+- Email: `admin@admin.com`
+- Password: `admin`
+
+**Подключение к серверу PostgreSQL:**
+1. Правый клик на "Servers" → "Register" → "Server"
+2. Вкладка "General":
+   - Name: `Archive Database`
+3. Вкладка "Connection":
+   - Host name/address: `postgres` (имя сервиса в docker-compose)
+   - Port: `5432`
+   - Maintenance database: `archive_db`
+   - Username: `archive_user`
+   - Password: `archive_pass`
+   - ✅ Save password
+4. Нажмите "Save"
+
+Теперь вы можете:
+- Просматривать все таблицы
+- Выполнять SQL запросы
+- Редактировать данные
+- Экспортировать/импортировать данные
+- Смотреть структуру БД
+
+### Способ 2: Внешние инструменты (DBeaver, DataGrip, pgAdmin Desktop)
+
+**Параметры подключения:**
+- Host: `localhost`
+- Port: `5433` (внешний порт)
+- Database: `archive_db`
+- Username: `archive_user`
+- Password: `archive_pass`
+
+### Способ 3: Командная строка (psql)
+
+```bash
 # Подключение к БД
 docker exec -it archive_postgres psql -U archive_user -d archive_db
+
+# Полезные команды в psql:
+\dt          # Список всех таблиц
+\d users     # Структура таблицы users
+\q           # Выход
+SELECT * FROM users;  # SQL запросы
 ```
 
 ---

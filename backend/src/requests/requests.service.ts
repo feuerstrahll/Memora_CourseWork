@@ -70,7 +70,8 @@ export class RequestsService {
     
     // Записываем информацию о том, кто обработал заявку
     if (updateRequestDto.status === RequestStatus.APPROVED || 
-        updateRequestDto.status === RequestStatus.REJECTED) {
+        updateRequestDto.status === RequestStatus.REJECTED ||
+        updateRequestDto.status === RequestStatus.COMPLETED) {
       request.processedById = processedById;
       request.processedAt = new Date();
     }

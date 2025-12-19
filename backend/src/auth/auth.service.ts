@@ -31,6 +31,9 @@ export class AuthService {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
+        occupation: user.occupation,
+        workplace: user.workplace,
+        position: user.position,
       },
     };
   }
@@ -59,6 +62,9 @@ export class AuthService {
         email: user.email,
         fullName: user.fullName,
         role: user.role,
+        occupation: user.occupation,
+        workplace: user.workplace,
+        position: user.position,
       },
     };
   }

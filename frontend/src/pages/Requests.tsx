@@ -20,6 +20,8 @@ export default function Requests() {
   const { data: requests } = useQuery({
     queryKey: ['requests'],
     queryFn: requestsApi.getAll,
+    refetchOnWindowFocus: true, // Обновлять данные при возврате фокуса на окно
+    refetchOnMount: true, // Обновлять данные при монтировании компонента
   })
 
   const createMutation = useMutation({
@@ -88,6 +90,13 @@ export default function Requests() {
     setRejectModalOpen(false)
     setRejectingRequestId(null)
     setRejectionReason('')
+  }
+
+  const handleComplete = (requestId: number) => {
+    updateMutation.mutate({
+      id: requestId,
+      status: RequestStatus.COMPLETED,
+    })
   }
 
   const getStatusBadge = (status: RequestStatus) => {
@@ -218,15 +227,17 @@ export default function Requests() {
                   )}
                   {request.processedBy && (
                     <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '2px' }}>
-                      {request.status === RequestStatus.APPROVED ? 'Одобрил' : 'Обработал'}: {request.processedBy.fullName}
+                      {request.status === RequestStatus.APPROVED ? 'Одобрил' : 
+                       request.status === RequestStatus.COMPLETED ? 'Выполнил' :
+                       request.status === RequestStatus.REJECTED ? 'Отклонил' : 'Обработал'}: {request.processedBy.fullName}
                     </div>
                   )}
                 </td>
                 <td>{request.user?.fullName || request.userId}</td>
                 <td>{new Date(request.createdAt).toLocaleDateString()}</td>
                 <td>
-                  {/* Документ доступен только для одобренных заявок */}
-                  {request.status === RequestStatus.APPROVED && request.record?.fileName ? (
+                  {/* Документ доступен для одобренных и выполненных заявок */}
+                  {(request.status === RequestStatus.APPROVED || request.status === RequestStatus.COMPLETED) && request.record?.fileName ? (
                     <button
                       className="btn-small"
                       onClick={() => recordsApi.downloadFile(request.record!.id, request.record!.fileName!)}
@@ -235,7 +246,7 @@ export default function Requests() {
                     >
                       📄 Скачать
                     </button>
-                  ) : request.status === RequestStatus.APPROVED ? (
+                  ) : (request.status === RequestStatus.APPROVED || request.status === RequestStatus.COMPLETED) ? (
                     <span style={{ color: '#999' }}>Нет файла</span>
                   ) : request.status === RequestStatus.REJECTED ? (
                     <span style={{ color: '#d32f2f' }}>Отказано</span>
@@ -283,8 +294,21 @@ export default function Requests() {
                         </button>
                       </div>
                     )}
-                    {(request.status === RequestStatus.APPROVED || request.status === RequestStatus.REJECTED) && (
+                    {request.status === RequestStatus.APPROVED && (
+                      <button
+                        className="btn-small"
+                        onClick={() => handleComplete(request.id)}
+                        style={{ backgroundColor: '#9c27b0', color: 'white' }}
+                        title="Отметить как выполненную"
+                      >
+                        📦 Выполнена
+                      </button>
+                    )}
+                    {request.status === RequestStatus.REJECTED && (
                       <span style={{ color: '#999', fontSize: '0.85rem' }}>Обработана</span>
+                    )}
+                    {request.status === RequestStatus.COMPLETED && (
+                      <span style={{ color: '#9c27b0', fontSize: '0.85rem', fontWeight: 'bold' }}>Выполнена</span>
                     )}
                     <button
                       className="btn-small btn-danger"

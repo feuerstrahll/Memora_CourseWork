@@ -30,6 +30,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+import { AccessLevel } from '../common/enums/access-level.enum';
 
 @ApiTags('records')
 @ApiBearerAuth()
@@ -133,8 +134,9 @@ export class RecordsController {
       throw new NotFoundException('У данной единицы хранения нет прикрепленного файла');
     }
 
-    // Researcher может скачивать файлы ТОЛЬКО через одобренные заявки
-    if (user.role === Role.RESEARCHER) {
+    // Если запись публичная, любой зарегистрированный пользователь может скачать файл
+    // Если запись ограниченная, Researcher может скачивать ТОЛЬКО через одобренные заявки
+    if (user.role === Role.RESEARCHER && record.accessLevel !== AccessLevel.PUBLIC) {
       const hasApprovedRequest = await this.recordsService.checkUserHasApprovedRequest(+id, user.id);
       
       if (!hasApprovedRequest) {

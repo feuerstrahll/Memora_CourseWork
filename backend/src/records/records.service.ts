@@ -245,12 +245,20 @@ export class RecordsService {
   }
 
   async checkUserHasApprovedRequest(recordId: number, userId: number): Promise<boolean> {
+    // Проверяем наличие одобренной или выполненной заявки
     const approvedRequest = await this.requestsRepository.findOne({
-      where: {
-        recordId,
-        userId,
-        status: RequestStatus.APPROVED,
-      },
+      where: [
+        {
+          recordId,
+          userId,
+          status: RequestStatus.APPROVED,
+        },
+        {
+          recordId,
+          userId,
+          status: RequestStatus.COMPLETED,
+        },
+      ],
     });
     
     return !!approvedRequest;

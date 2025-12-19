@@ -544,8 +544,10 @@ export default function Records() {
                 <td>
                   {record.fileName ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      {/* Researcher НЕ может скачивать файлы напрямую - только через заявки */}
-                      {(user?.role === Role.ADMIN || user?.role === Role.ARCHIVIST) ? (
+                      {/* Admin и Archivist могут скачивать всегда, Researcher - только если запись публичная */}
+                      {(user?.role === Role.ADMIN || 
+                        user?.role === Role.ARCHIVIST || 
+                        (user?.role === Role.RESEARCHER && record.accessLevel === AccessLevel.PUBLIC)) ? (
                         <>
                           <button
                             className="btn-small"
@@ -555,23 +557,26 @@ export default function Records() {
                           >
                             📎 Скачать
                           </button>
-                          <button
-                            className="btn-small btn-danger"
-                            onClick={async () => {
-                              if (confirm('Удалить файл?')) {
-                                try {
-                                  await recordsApi.deleteFile(record.id)
-                                  showToast('Файл успешно удален', 'success')
-                                  queryClient.invalidateQueries({ queryKey: ['records'] })
-                                } catch (error) {
-                                  showToast('Ошибка при удалении файла', 'error')
+                          {/* Кнопка удаления только для Admin и Archivist */}
+                          {(user?.role === Role.ADMIN || user?.role === Role.ARCHIVIST) && (
+                            <button
+                              className="btn-small btn-danger"
+                              onClick={async () => {
+                                if (confirm('Удалить файл?')) {
+                                  try {
+                                    await recordsApi.deleteFile(record.id)
+                                    showToast('Файл успешно удален', 'success')
+                                    queryClient.invalidateQueries({ queryKey: ['records'] })
+                                  } catch (error) {
+                                    showToast('Ошибка при удалении файла', 'error')
+                                  }
                                 }
-                              }
-                            }}
-                            style={{ fontSize: '0.8rem' }}
-                          >
-                            🗑️
-                          </button>
+                              }}
+                              style={{ fontSize: '0.8rem' }}
+                            >
+                              🗑️
+                            </button>
+                          )}
                         </>
                       ) : (
                         <span style={{ color: '#e74c3c', fontSize: '0.85rem', fontWeight: 'bold' }}>
